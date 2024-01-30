@@ -1,0 +1,7 @@
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 2023-12-20
+  Features:
+    - Initial release
+  Compatibility:
+    - Added Space Exploration

@@ -1,0 +1,11 @@
+{
+  "name": "FreeBuildings",
+  "version": "1.0.0",
+  "title": "Free Buildings",
+  "author": "Taurunti",
+  "contact": "thetaurunti@gmail.com",
+  "homepage": "https://github.com/TheTaurunti/factorio-freebuildings",
+  "factorio_version": "1.1",
+  "dependencies": ["base >= 1.1", "? space-exploration"],
+  "description": "The Factory Must Grow. Crafting Buildings is Fast & Free. A mod for the editor-mode and shapez enjoyers."
+}
