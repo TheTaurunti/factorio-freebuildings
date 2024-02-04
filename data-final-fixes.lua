@@ -2,7 +2,7 @@
 -- Load Settings
 -- =============
 
-local RECIPE_TIME = 0.01
+local RECIPE_TIME = settings.startup["recipe-time"].value
 
 -- ===========================================
 -- Blacklisting & Forcing Item/Recipe Freebies
@@ -91,12 +91,6 @@ local function make_recipe_free(recipe)
 
   recipe.ingredients = {}
   recipe.energy_required = RECIPE_TIME
-
-  -- This "crafting" category should allow most everything to make it, including the player.
-  if (recipe.category)
-  then
-    recipe.category = "crafting"
-  end
 end
 
 -- ================
