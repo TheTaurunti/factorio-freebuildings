@@ -68,12 +68,17 @@ local function get_recipe_result(recipe)
   -- >> Seems unnecessary, as building tend to not have byproducts when constructed.
 
   local recipe_standard = recipe.normal or recipe
-  return (
-    recipe_standard.results and recipe_standard.results[1] and (
-      recipe_standard.results[1].name
-      or recipe_standard.results[1][1]
-    )
-  ) or recipe_standard.result
+  local results = recipe_standard.results
+
+  if (not results) then return recipe_standard.result end
+  if (#results > 1) then return nil end
+
+  if (results[1])
+  then
+    return results[1].name or results[1][1]
+  end
+
+  return nil
 end
 
 local function make_recipe_free(recipe)
@@ -132,9 +137,7 @@ for _, recipe in pairs(recipes) do
     make_recipe_free(recipe)
   end
 
-  -- Set coin result for naughty recipes
-  -- >> This is rather destructive, so only do it
-  -- ... for things you know are a problem.
+  -- Set coin result for naughty recipes (recycling things that are free)
   if (Coin_Recipes[recipe.name])
   then
     local recipe_standard = recipe.normal or recipe
