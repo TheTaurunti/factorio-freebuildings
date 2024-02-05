@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.1
+Date: 2024-02-04
+  Fixes:
+    - Issue where a recipe that results in a building/placeable AND a fluid caused a crash when setting crafting category. Mod now skips those recipes that have more than one output result.
+---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 2023-12-20
   Features:
