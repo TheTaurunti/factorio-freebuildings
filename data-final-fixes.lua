@@ -3,6 +3,7 @@
 -- =============
 
 local RECIPE_TIME = 0.01
+local ITEM_OUTPUT_AND_STACK_MULT = settings.startup["FreeBuildings-item-mult"].value
 
 -- ===========================================
 -- Blacklisting & Forcing Item/Recipe Freebies
@@ -53,20 +54,11 @@ for _, group in ipairs(whitelist_groups) do
   end
 end
 
--- ==========
--- Mod Compat
--- ==========
-
-require("compatibility.data-final-fixes.space-exploration")
-
 -- =================
 -- Utility Functions
 -- =================
 
 local function get_recipe_result(recipe)
-  -- Could check each result, instead of just the first one.
-  -- >> Seems unnecessary, as building tend to not have byproducts when constructed.
-
   local recipe_standard = recipe.normal or recipe
   local results = recipe_standard.results
 
@@ -82,20 +74,19 @@ local function get_recipe_result(recipe)
 end
 
 local function make_recipe_free(recipe)
-  if (recipe.normal)
-  then
-    recipe.normal.ingredients = {}
-    recipe.normal.energy_required = RECIPE_TIME
-  end
+  local variants = {
+    recipe,
+    recipe.normal,
+    recipe.expensive
+  }
 
-  if (recipe.expensive)
-  then
-    recipe.expensive.ingredients = {}
-    recipe.expensive.energy_required = RECIPE_TIME
+  for _, variant in ipairs(variants) do
+    if (variant)
+    then
+      variant.ingredients = {}
+      variant.energy_required = RECIPE_TIME
+    end
   end
-
-  recipe.ingredients = {}
-  recipe.energy_required = RECIPE_TIME
 
   -- This "crafting" category should allow most everything to make it, including the player.
   if (recipe.category)
@@ -103,6 +94,40 @@ local function make_recipe_free(recipe)
     recipe.category = "crafting"
   end
 end
+
+local function mult_recipe_output(recipe)
+  local variants = {
+    recipe,
+    recipe.normal,
+    recipe.expensive
+  }
+
+  for _, variant in ipairs(variants) do
+    if (variant)
+    then
+      if (variant.results)
+      then
+        variant.results[1].amount = variant.results[1].amount * ITEM_OUTPUT_AND_STACK_MULT
+      else
+        variant.result_count = (variant.result_count or 1) * ITEM_OUTPUT_AND_STACK_MULT
+      end
+    end
+  end
+end
+
+-- Non-local for mod compats
+function Mult_Item_Stack_Size(item)
+  item.stack_size = item.stack_size * ITEM_OUTPUT_AND_STACK_MULT
+end
+
+-- ==========
+-- Mod Compat
+-- ==========
+
+Mult_Item_Stack_Size(data.raw["rail-planner"]["rail"])
+
+require("compatibility.data-final-fixes.space-exploration")
+
 
 -- ================
 -- Script Execution
@@ -123,6 +148,7 @@ for _, group in ipairs(item_check_groups) do
         )
     then
       items_to_be_free[thing.name] = true
+      Mult_Item_Stack_Size(thing)
     end
   end
 end
@@ -135,6 +161,7 @@ for _, recipe in pairs(recipes) do
   if (Recipe_ForceList[recipe.name] or (result and items_to_be_free[result]))
   then
     make_recipe_free(recipe)
+    mult_recipe_output(recipe)
   end
 
   -- Set coin result for naughty recipes (recycling things that are free)
