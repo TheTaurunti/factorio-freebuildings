@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2024-03-10
+  Features:
+    - Added localization for mod options
+    - Added mod option to make modules free, as they exist in a grey area of "things needed for building more".
+  Fixes:
+    - "Coin Recipes" to prevent free resources via recycling has been properly implemented.
+---------------------------------------------------------------------------------------------------
 Version: 1.0.1
 Date: 2024-02-04
   Fixes:

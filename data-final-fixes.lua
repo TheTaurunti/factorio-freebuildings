@@ -4,6 +4,7 @@
 
 local RECIPE_TIME = 0.01
 local ITEM_OUTPUT_AND_STACK_MULT = settings.startup["FreeBuildings-item-mult"].value
+local MAKE_MODULES_FREE = settings.startup["FreeBuildings-include-modules"].value
 
 -- ===========================================
 -- Blacklisting & Forcing Item/Recipe Freebies
@@ -133,12 +134,12 @@ require("compatibility.data-final-fixes.space-exploration")
 -- Script Execution
 -- ================
 
-local items_to_be_free = {}
 local item_check_groups = {
   "item",
   "item-with-entity-data"
 }
 
+local items_to_be_free = {}
 
 for _, group in ipairs(item_check_groups) do
   for _, thing in pairs(data.raw[group]) do
@@ -153,6 +154,14 @@ for _, group in ipairs(item_check_groups) do
   end
 end
 
+if (MAKE_MODULES_FREE)
+then
+  for _, thing in pairs(data.raw["module"]) do
+    items_to_be_free[thing.name] = true
+    Mult_Item_Stack_Size(thing)
+  end
+end
+
 
 local recipes = data.raw["recipe"]
 for _, recipe in pairs(recipes) do
@@ -164,17 +173,26 @@ for _, recipe in pairs(recipes) do
     mult_recipe_output(recipe)
   end
 
-  -- Set coin result for naughty recipes (recycling things that are free)
+  -- Trying to prevent free resources from recipes that recycle stuff
   if (Coin_Recipes[recipe.name])
   then
-    local recipe_standard = recipe.normal or recipe
+    local variants = {
+      recipe,
+      recipe.normal,
+      recipe.expensive
+    }
 
-    if (recipe_standard.results)
-    then
-      recipe_standard.results = nil
+    for _, variant in ipairs(variants) do
+      if (variant)
+      then
+        if (variant.results)
+        then
+          variant.results = { { type = "item", name = "coin", amount = 1 } }
+        else
+          variant.result = "coin"
+          variant.result_count = 1
+        end
+      end
     end
-
-    recipe.result = "coin"
-    recipe.result_count = 1
   end
 end
