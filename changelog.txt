@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.3
+Date: 2024-08-24
+  Features:
+    - Recipes which are made from Free Things will instead be made from that Free Thing's component parts. Feature implemented due to my own frustrations with Logistic and Production science being made Free because all of their ingredients themselves were free. Can be disabled or reduced via Startup Setting. Method used is not 100% accurate and errs on the side of expensive.
+---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2024-03-10
   Features:
