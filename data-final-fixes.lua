@@ -160,7 +160,8 @@ end
 
 Mult_Item_Stack_Size(data.raw["rail-planner"]["rail"])
 
-require("compatibility.data-final-fixes.space-exploration")
+require("compatibility.space-exploration")
+require("compatibility.IndustrialRevolution3")
 
 
 -- ================
