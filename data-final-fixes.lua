@@ -2,10 +2,10 @@
 -- Load Settings
 -- =============
 
-local RECIPE_TIME = 0.01
-local ITEM_OUTPUT_AND_STACK_MULT = settings.startup["FreeBuildings-item-mult"].value
-local MAKE_MODULES_FREE = settings.startup["FreeBuildings-include-modules"].value
-local RECIPE_DECOMPOSITION = settings.startup["FreeBuildings-recipe-decomposition"].value
+RECIPE_TIME = 0.01
+ITEM_OUTPUT_AND_STACK_MULT = settings.startup["FreeBuildings-item-mult"].value
+MAKE_MODULES_FREE = settings.startup["FreeBuildings-include-modules"].value
+RECIPE_DECOMPOSITION = settings.startup["FreeBuildings-recipe-decomposition"].value
 
 -- ===========================================
 -- Blacklisting & Forcing Item/Recipe Freebies
@@ -60,99 +60,7 @@ end
 -- Utility Functions
 -- =================
 
-local function add_or_increment_table_value(table, key, value)
-	if (table[key] == nil) then table[key] = 0 end
-	table[key] = table[key] + value
-end
-
--- Ensures I don't have to deal with the shorthand form of item definitions
-local function format_input_resource_standard(input)
-	local input_type = "item"
-	if (input.type and input.type == "fluid")
-	then
-		input_type = "fluid"
-	end
-
-	return {
-		type = input_type,
-		name = (input.name or input[1]),
-		amount = (input.amount or input[2])
-	}
-end
-
-local function get_recipe_ingredients_standard(recipe)
-	-- excluding fluids because it adds complexity i don't want to think about right now
-	local ret = {}
-
-	local recipe_standard = recipe.normal or recipe
-	for _, ingred in ipairs(recipe_standard.ingredients) do
-		table.insert(ret, format_input_resource_standard(ingred))
-	end
-
-	return ret
-end
-
-local function get_recipe_result(recipe)
-	local recipe_standard = recipe.normal or recipe
-	local results = recipe_standard.results
-
-	if (not results) then return recipe_standard.result end
-	if (#results > 1) then return nil end
-
-	if (results[1])
-	then
-		return results[1].name or results[1][1]
-	end
-
-	return nil
-end
-
-local function make_recipe_free(recipe)
-	local variants = {
-		recipe,
-		recipe.normal,
-		recipe.expensive
-	}
-
-	for _, variant in ipairs(variants) do
-		if (variant)
-		then
-			variant.ingredients = {}
-			variant.energy_required = RECIPE_TIME
-		end
-	end
-
-	-- This "crafting" category should allow most everything to make it, including the player.
-	if (recipe.category)
-	then
-		recipe.category = "crafting"
-	end
-end
-
-local function mult_recipe_output(recipe)
-	local variants = {
-		recipe,
-		recipe.normal,
-		recipe.expensive
-	}
-
-	for _, variant in ipairs(variants) do
-		if (variant)
-		then
-			if (variant.results)
-			then
-				variant.results[1].amount = variant.results[1].amount * ITEM_OUTPUT_AND_STACK_MULT
-			else
-				variant.result_count = (variant.result_count or 1) * ITEM_OUTPUT_AND_STACK_MULT
-			end
-		end
-	end
-end
-
--- Non-local for mod compats
-function Mult_Item_Stack_Size(item)
-	item.stack_size = item.stack_size * ITEM_OUTPUT_AND_STACK_MULT
-end
+require("utils")
 
 -- ==========
 -- Mod Compat
@@ -204,16 +112,16 @@ local item_made_free_ingredients = {}
 
 local recipes = data.raw["recipe"]
 for _, recipe in pairs(recipes) do
-	local result = get_recipe_result(recipe)
+	local result = Get_Recipe_Result(recipe)
 
 	if (Recipe_ForceList[recipe.name] or (result and items_to_be_free[result]))
 	then
 		if (result)
 		then
-			item_made_free_ingredients[result] = get_recipe_ingredients_standard(recipe)
+			item_made_free_ingredients[result] = Get_Recipe_Ingredients(recipe)
 		end
-		make_recipe_free(recipe)
-		mult_recipe_output(recipe)
+		Make_Recipe_Free(recipe)
+		Mult_Recipe_Output(recipe)
 	end
 
 	-- Trying to prevent free resources from recipes that recycle stuff
@@ -259,7 +167,7 @@ end
 local any_recipe_needed_decomposition = true
 while (any_recipe_needed_decomposition and remaining_decomp_iterations > 0) do
 	for _, recipe in pairs(recipes) do
-		local ingredients = get_recipe_ingredients_standard(recipe)
+		local ingredients = Get_Recipe_Ingredients(recipe)
 
 		local fluid_inputs = {}
 		local item_inputs = {}
@@ -274,7 +182,7 @@ while (any_recipe_needed_decomposition and remaining_decomp_iterations > 0) do
 				if (decomp_ingredients == nil)
 				then
 					-- item is not a building, add without changes
-					add_or_increment_table_value(item_inputs, ingred.name, ingred.amount)
+					Add_Or_Increment_Table_Value(item_inputs, ingred.name, ingred.amount)
 				else
 					-- item is a (free) building, time to decompose
 					this_recipe_had_decomp = true
@@ -282,7 +190,7 @@ while (any_recipe_needed_decomposition and remaining_decomp_iterations > 0) do
 					for _, decomp in ipairs(decomp_ingredients) do
 						if (decomp.type == "item")
 						then
-							add_or_increment_table_value(item_inputs, decomp.name, decomp.amount * ingred.amount)
+							Add_Or_Increment_Table_Value(item_inputs, decomp.name, decomp.amount * ingred.amount)
 						end
 					end
 				end
