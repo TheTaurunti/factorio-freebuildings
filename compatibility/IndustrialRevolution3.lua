@@ -11,7 +11,7 @@ then
 	Item_Blacklist["tree-planter-09"] = true
 	Item_Blacklist["tree-planter-ir-rubber-tree"] = true
 
-	Recipe_ForceList["waterfill-explosive"] = true
+	Item_Blacklist["waterfill-explosive"] = true
 
 	-- Prevents crashes, is related to the opening cinematic.
 	Item_Blacklist["fake-transmat"] = true
