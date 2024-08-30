@@ -13,19 +13,6 @@ then
 
 	Item_Blacklist["waterfill-explosive"] = true
 
-	-- Prevents crashes, is related to the opening cinematic.
+	-- Prevents crashes, idk why. Is related to the opening cinematic.
 	Item_Blacklist["fake-transmat"] = true
-
-	-- if (MAKE_MODULES_FREE)
-	-- then
-	-- 	Coin_Recipes["deprogram-speed-module"] = true
-	-- 	Coin_Recipes["deprogram-speed-module-2"] = true
-	-- 	Coin_Recipes["deprogram-speed-module-3"] = true
-	-- 	Coin_Recipes["deprogram-effectivity-module"] = true
-	-- 	Coin_Recipes["deprogram-effectivity-module-2"] = true
-	-- 	Coin_Recipes["deprogram-effectivity-module-3"] = true
-	-- 	Coin_Recipes["deprogram-productivity-module"] = true
-	-- 	Coin_Recipes["deprogram-productivity-module-2"] = true
-	-- 	Coin_Recipes["deprogram-productivity-module-3"] = true
-	-- end
 end

@@ -13,10 +13,9 @@ data:extend({
 		default_value = false
 	},
 	{
-		type = "string-setting",
-		name = "FreeBuildings-recipe-decomposition",
+		type = "bool-setting",
+		name = "FreeBuildings-recipe-breakdown",
 		setting_type = "startup",
-		default_value = "Full",
-		allowed_values = { "Full", "Once", "None" }
+		default_value = true
 	}
 })

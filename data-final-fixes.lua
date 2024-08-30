@@ -5,7 +5,7 @@
 RECIPE_TIME = 0.01
 ITEM_OUTPUT_AND_STACK_MULT = settings.startup["FreeBuildings-item-mult"].value
 MAKE_MODULES_FREE = settings.startup["FreeBuildings-include-modules"].value
-RECIPE_DECOMPOSITION = settings.startup["FreeBuildings-recipe-decomposition"].value
+INGREDIENT_BREAKDOWN = settings.startup["FreeBuildings-recipe-breakdown"].value
 
 -- ===========================================
 -- Blacklisting & Forcing Item/Recipe Freebies
@@ -25,9 +25,9 @@ Recipe_ForceList = {
 	["rail"] = true
 }
 
--- Recipes to replace output with a (useless) coin item.
--- >> The point of this is to avoid free resources from things that recycle / break down buildings.
-Coin_Recipes = {}
+-- Recipes whose output should be removed, to prevent the creation of free resources
+-- > Might be obsolete, with the breakdown feature
+Bad_Recycle_Recipes = {}
 
 
 local blacklist_groups = {
@@ -114,105 +114,45 @@ local recipes = data.raw["recipe"]
 for _, recipe in pairs(recipes) do
 	local result = Get_Recipe_Result(recipe)
 
-	if (Recipe_ForceList[recipe.name] or (result and items_to_be_free[result]))
+	local result_name = result.name
+	local result_amount = result.amount
+
+	if (Recipe_ForceList[recipe.name] or (result_name and items_to_be_free[result_name]))
 	then
-		if (result)
+		if (result_name)
 		then
-			item_made_free_ingredients[result] = Get_Recipe_Ingredients(recipe)
+			local ingreds = Get_Recipe_Ingredients(recipe)
+
+			-- key step to ensure accuracy of broken-down ingredients
+			for _, ingredient in ipairs(ingreds) do
+				ingredient.amount = ingredient.amount / result_amount
+			end
+
+			item_made_free_ingredients[result_name] = ingreds
 		end
+
 		Make_Recipe_Free(recipe)
 		Mult_Recipe_Output(recipe)
 	end
 
-	-- Trying to prevent free resources from recipes that recycle stuff
-	if (Coin_Recipes[recipe.name])
+	-- Prevent free resources from recipes that recycle stuff
+	if (Bad_Recycle_Recipes[recipe.name])
 	then
-		local variants = {
-			recipe,
-			recipe.normal,
-			recipe.expensive
-		}
-
-		for _, variant in ipairs(variants) do
-			if (variant)
-			then
-				if (variant.results)
-				then
-					variant.results = { { type = "item", name = "coin", amount = 1 } }
-				else
-					variant.result = "coin"
-					variant.result_count = 1
-				end
-			end
-		end
+		Remove_Recipe_Results(recipe)
 	end
 end
 
--- RECIPE_DECOMPOSITION // "Full", "Once", "None"
-local remaining_decomp_iterations = 0
-if (RECIPE_DECOMPOSITION == "Full") then
-	-- should be more than enough
-	remaining_decomp_iterations = 20
-elseif (RECIPE_DECOMPOSITION == "Once") then
-	remaining_decomp_iterations = 1
-end
 
 -- Now check for recipes that *use* buildings (which have been made free)
 -- .. and decompose those buildings into the ingredients that they would've
 -- .. normally needed! Doing this maintains the actual cost of things like research
 -- .. but allows for free buildings nonetheless
 
--- Using a while loop for decomposition is wasteful in terms of computer resources
--- ... but is a very simple way to make sure things are decomposed properly
-local any_recipe_needed_decomposition = true
-while (any_recipe_needed_decomposition and remaining_decomp_iterations > 0) do
+-- Needs to happen in a secondary loop, since the first
+-- ... figures out what free things are made of
+if (INGREDIENT_BREAKDOWN)
+then
 	for _, recipe in pairs(recipes) do
-		local ingredients = Get_Recipe_Ingredients(recipe)
-
-		local fluid_inputs = {}
-		local item_inputs = {}
-
-		local this_recipe_had_decomp = false
-		for _, ingred in ipairs(ingredients) do
-			if (ingred.type == "fluid")
-			then
-				fluid_inputs[ingred.name] = ingred.amount
-			else
-				local decomp_ingredients = item_made_free_ingredients[ingred.name]
-				if (decomp_ingredients == nil)
-				then
-					-- item is not a building, add without changes
-					Add_Or_Increment_Table_Value(item_inputs, ingred.name, ingred.amount)
-				else
-					-- item is a (free) building, time to decompose
-					this_recipe_had_decomp = true
-					any_recipe_needed_decomposition = true
-					for _, decomp in ipairs(decomp_ingredients) do
-						if (decomp.type == "item")
-						then
-							Add_Or_Increment_Table_Value(item_inputs, decomp.name, decomp.amount * ingred.amount)
-						end
-					end
-				end
-			end
-		end
-
-		if (this_recipe_had_decomp)
-		then
-			local new_ingredients = {}
-
-			for fluid_name, fluid_amount in pairs(fluid_inputs) do
-				table.insert(new_ingredients, { type = "fluid", name = fluid_name, amount = fluid_amount })
-			end
-
-			for item_name, item_amount in pairs(item_inputs) do
-				table.insert(new_ingredients, { type = "item", name = item_name, amount = item_amount })
-			end
-
-			local recipe_standard = recipe.normal or recipe
-			recipe_standard.ingredients = new_ingredients
-		end
+		Breakdown_Recipe_Ingredients(recipe, item_made_free_ingredients)
 	end
-
-	remaining_decomp_iterations = remaining_decomp_iterations - 1
-end -- while
+end

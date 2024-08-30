@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.0.5
+Date: 2024-08-29
+  Features:
+    - Renamed feature for fixing things made from Free Things
+		- Improved accuracy of ingredient breakdown feature
+---------------------------------------------------------------------------------------------------
 Version: 1.0.4
 Date: 2024-08-25
   Compatibility:

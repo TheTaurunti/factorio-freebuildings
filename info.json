@@ -1,6 +1,6 @@
 {
   "name": "FreeBuildings",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "title": "Free Buildings",
   "author": "Taurunti",
   "contact": "thetaurunti@gmail.com",
@@ -12,5 +12,5 @@
     "(?) space-exploration-postprocess",
     "(?) IndustrialRevolution3"
   ],
-  "description": "The Factory Must Grow. Crafting Buildings is Fast & Free. A mod for the editor-mode and shapez enjoyers."
+  "description": "The Factory Must Grow. Crafting Buildings is Fast & Free. A mod for the editor-mode, x1000 science and shapez enjoyers."
 }

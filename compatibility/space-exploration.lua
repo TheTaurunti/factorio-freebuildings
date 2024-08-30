@@ -10,10 +10,10 @@ then
 
   -- Space Exploration defines a function "reverse_recipe()"
   -- >> Look for that when updating compatibility here.
-  Coin_Recipes["se-recycle-small-electric-pole"] = true
-  Coin_Recipes["se-recycle-small-iron-electric-pole"] = true
-  Coin_Recipes["se-recycle-medium-electric-pole"] = true
-  Coin_Recipes["se-recycle-big-electric-pole"] = true
-  Coin_Recipes["se-recycle-substation"] = true
-  Coin_Recipes["se-recycle-radar"] = true
+  Bad_Recycle_Recipes["se-recycle-small-electric-pole"] = true
+  Bad_Recycle_Recipes["se-recycle-small-iron-electric-pole"] = true
+  Bad_Recycle_Recipes["se-recycle-medium-electric-pole"] = true
+  Bad_Recycle_Recipes["se-recycle-big-electric-pole"] = true
+  Bad_Recycle_Recipes["se-recycle-substation"] = true
+  Bad_Recycle_Recipes["se-recycle-radar"] = true
 end
