@@ -97,7 +97,7 @@ function Mult_Recipe_Output(recipe)
 				local first_result = variant.results[1]
 				if (first_result.amount)
 				then
-					first_result[1].amount = first_result[1].amount * ITEM_OUTPUT_AND_STACK_MULT
+					first_result.amount = first_result.amount * ITEM_OUTPUT_AND_STACK_MULT
 				else
 					first_result[1] = first_result[1] * ITEM_OUTPUT_AND_STACK_MULT
 				end
