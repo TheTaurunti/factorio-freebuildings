@@ -45,7 +45,6 @@ end
 
 
 local whitelist_groups = {
-	--"rail-planner", -- Sadly does not work
 	"locomotive",
 	"cargo-wagon",
 	"fluid-wagon"
@@ -68,6 +67,7 @@ require("utils")
 
 Mult_Item_Stack_Size(data.raw["rail-planner"]["rail"])
 
+require("compatibility.A_Total_Automization_Infantry_Edition")
 require("compatibility.space-exploration")
 require("compatibility.IndustrialRevolution3")
 
