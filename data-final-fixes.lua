@@ -26,7 +26,6 @@ Recipe_ForceList = {
 }
 
 -- Recipes whose output should be removed, to prevent the creation of free resources
--- > Might be obsolete, with the breakdown feature
 Bad_Recycle_Recipes = {}
 
 
@@ -68,8 +67,12 @@ require("utils")
 Mult_Item_Stack_Size(data.raw["rail-planner"]["rail"])
 
 require("compatibility.A_Total_Automization_Infantry_Edition")
-require("compatibility.space-exploration")
+require("compatibility.elevated-rails")
 require("compatibility.IndustrialRevolution3")
+require("compatibility.LunarLandings")
+require("compatibility.quality")
+require("compatibility.space-age")
+require("compatibility.space-exploration")
 
 
 -- ================
@@ -121,7 +124,7 @@ for _, recipe in pairs(recipes) do
 	then
 		if (result_name)
 		then
-			local ingreds = Get_Recipe_Ingredients(recipe)
+			local ingreds = recipe.ingredients
 
 			-- key step to ensure accuracy of broken-down ingredients
 			for _, ingredient in ipairs(ingreds) do
@@ -150,7 +153,7 @@ end
 
 -- Needs to happen in a secondary loop, since the first
 -- ... figures out what free things are made of
-if (INGREDIENT_BREAKDOWN)
+if (INGREDIENT_BREAKDOWN and false)
 then
 	for _, recipe in pairs(recipes) do
 		Breakdown_Recipe_Ingredients(recipe, item_made_free_ingredients)

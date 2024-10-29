@@ -18,17 +18,6 @@ function Format_Item_Definition_Standard(input)
 	}
 end
 
-function Get_Recipe_Ingredients(recipe)
-	local ret = {}
-
-	local recipe_standard = recipe.normal or recipe
-	for _, ingred in ipairs(recipe_standard.ingredients) do
-		table.insert(ret, Format_Item_Definition_Standard(ingred))
-	end
-
-	return ret
-end
-
 function Get_Recipe_Result(recipe)
 	local recipe_standard = recipe.normal or recipe
 	local results = recipe_standard.results
@@ -79,6 +68,12 @@ function Make_Recipe_Free(recipe)
 	if (recipe.category)
 	then
 		recipe.category = "crafting"
+	end
+
+	-- For similar reasons, removing surface restrictions for crafting buildings is desired.
+	if (recipe.surface_conditions)
+	then
+		recipe.surface_conditions = nil
 	end
 end
 
@@ -146,11 +141,17 @@ function Make_Recipe_Output_Coin(recipe)
 end
 
 function Breakdown_Recipe_Ingredients(recipe, breakdown_table)
-	local working_ingredients = Get_Recipe_Ingredients(recipe)
+	local working_ingredients = recipe.ingredients
+	if (not working_ingredients) then return end
+
+	-- 100 iterations is more than enough to catch infinite loops (Yumako soil???)
+	local max_iterations = 100
+	local iterations_done = 0
+
 	local any_breakdown_done = false
 
 	local needs_processing = true
-	while (needs_processing) do
+	while (needs_processing and iterations_done < max_iterations) do
 		needs_processing = false
 
 		local fluid_inputs = {}
@@ -198,6 +199,13 @@ function Breakdown_Recipe_Ingredients(recipe, breakdown_table)
 
 			working_ingredients = new_ingredients
 		end
+
+		iterations_done = iterations_done + 1
+	end
+
+	if (iterations_done >= max_iterations)
+	then
+		log("FreeBuildings workable error - Max iterations reached breaking down recipe: " + recipe.name)
 	end
 
 	if (any_breakdown_done)
