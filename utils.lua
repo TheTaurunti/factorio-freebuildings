@@ -3,50 +3,9 @@ function Add_Or_Increment_Table_Value(table, key, value)
 	table[key] = table[key] + value
 end
 
--- Ensures I don't have to deal with the shorthand form of item definitions
-function Format_Item_Definition_Standard(input)
-	local input_type = "item"
-	if (input.type and input.type == "fluid")
-	then
-		input_type = "fluid"
-	end
-
-	return {
-		type = input_type,
-		name = (input.name or input[1]),
-		amount = (input.amount or input[2])
-	}
-end
-
 function Get_Recipe_Result(recipe)
-	local recipe_standard = recipe.normal or recipe
-	local results = recipe_standard.results
-
-	-- ensuring the return variable itself isn't nil
-	local ret = {
-		name = nil,
-		amount = nil
-	}
-
-	if (not results)
-	then
-		return {
-			name = recipe_standard.result,
-			amount = recipe_standard.result_count or 1
-		}
-	end
-
-	if (#results > 1) then return ret end
-
-	if (results[1])
-	then
-		return {
-			name = (results[1].name or results[1][1]),
-			amount = (results[1].amount or results[1][2])
-		}
-	end
-
-	return ret
+	if (not #recipe.results == 1) then return nil end
+	return recipe.results[1]
 end
 
 function Make_Recipe_Free(recipe)
@@ -78,66 +37,14 @@ function Make_Recipe_Free(recipe)
 end
 
 function Mult_Recipe_Output(recipe)
-	local variants = {
-		recipe,
-		recipe.normal,
-		recipe.expensive
-	}
-
-	for _, variant in ipairs(variants) do
-		if (variant)
-		then
-			if (variant.results)
-			then
-				local first_result = variant.results[1]
-				if (first_result.amount)
-				then
-					first_result.amount = first_result.amount * ITEM_OUTPUT_AND_STACK_MULT
-				else
-					first_result[1] = first_result[1] * ITEM_OUTPUT_AND_STACK_MULT
-				end
-			else
-				variant.result_count = (variant.result_count or 1) * ITEM_OUTPUT_AND_STACK_MULT
-			end
-		end
-	end
+	if (#recipe.results < 1) then return end
+	local first_result = recipe.results[1]
+	first_result.amount = first_result.amount * ITEM_OUTPUT_AND_STACK_MULT
 end
 
 -- Non-local for mod compats
 function Mult_Item_Stack_Size(item)
 	item.stack_size = item.stack_size * ITEM_OUTPUT_AND_STACK_MULT
-end
-
-function Remove_Recipe_Results(recipe)
-	local recipe_standard = recipe.normal or recipe
-
-	if (recipe_standard.results)
-	then
-		recipe_standard.results = {}
-	else
-		recipe_standard.result = nil
-		recipe_standard.result_count = 0
-	end
-end
-
-function Make_Recipe_Output_Coin(recipe)
-	local variants = {
-		recipe,
-		recipe.normal,
-		recipe.expensive
-	}
-	for _, variant in ipairs(variants) do
-		if (variant)
-		then
-			if (variant.results)
-			then
-				variant.results = { { type = "item", name = "coin", amount = 1 } }
-			else
-				variant.result = "coin"
-				variant.result_count = 1
-			end
-		end
-	end
 end
 
 function Breakdown_Recipe_Ingredients(recipe, breakdown_table)
@@ -221,7 +128,6 @@ function Breakdown_Recipe_Ingredients(recipe, breakdown_table)
 			end
 		end
 
-		local recipe_standard = recipe.normal or recipe
-		recipe_standard.ingredients = working_ingredients
+		recipe.ingredients = working_ingredients
 	end
 end

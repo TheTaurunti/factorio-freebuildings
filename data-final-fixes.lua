@@ -117,8 +117,13 @@ local recipes = data.raw["recipe"]
 for _, recipe in pairs(recipes) do
 	local result = Get_Recipe_Result(recipe)
 
-	local result_name = result.name
-	local result_amount = result.amount
+	local result_name = nil
+	local result_amount = nil
+	if (result)
+	then
+		result_name = result.name
+		result_amount = result.amount
+	end
 
 	if (Recipe_ForceList[recipe.name] or (result_name and items_to_be_free[result_name]))
 	then
@@ -141,7 +146,7 @@ for _, recipe in pairs(recipes) do
 	-- Prevent free resources from recipes that recycle stuff
 	if (Bad_Recycle_Recipes[recipe.name])
 	then
-		Remove_Recipe_Results(recipe)
+		recipe.results = {}
 	end
 end
 
