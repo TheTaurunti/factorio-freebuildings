@@ -4,7 +4,7 @@ function Add_Or_Increment_Table_Value(table, key, value)
 end
 
 function Get_Recipe_Result(recipe)
-	if (not #recipe.results == 1) then return nil end
+	if (not recipe.results or not #recipe.results == 1) then return nil end
 	return recipe.results[1]
 end
 
