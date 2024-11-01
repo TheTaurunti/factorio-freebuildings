@@ -25,9 +25,6 @@ Recipe_ForceList = {
 	["rail"] = true
 }
 
--- Recipes whose output should be removed, to prevent the creation of free resources
-Bad_Recycle_Recipes = {}
-
 
 local blacklist_groups = {
 	"solar-panel",
@@ -63,6 +60,9 @@ require("utils")
 -- ==========
 -- Mod Compat
 -- ==========
+-- NOTE: Mods which do recycling are handled after main script execution.
+-- >> This field is available NOW so that mods which add 1 or 2 bad recipes can simply add them.
+Bad_Recycle_Recipes = {}
 
 Mult_Item_Stack_Size(data.raw["rail-planner"]["rail"])
 
@@ -70,23 +70,20 @@ require("compatibility.A_Total_Automization_Infantry_Edition")
 require("compatibility.elevated-rails")
 require("compatibility.IndustrialRevolution3")
 require("compatibility.LunarLandings")
-require("compatibility.quality")
 require("compatibility.space-age")
 require("compatibility.space-exploration")
 
 
--- ================
--- Script Execution
--- ================
+-- ============
+-- Script Setup
+-- ============
+-- Gathering information on what items should be free to craft.
 
+local items_to_be_free = {}
 local item_check_groups = {
 	"item",
 	"item-with-entity-data"
 }
-
--- Collecting names of items which need to be free
-
-local items_to_be_free = {}
 
 for _, group in ipairs(item_check_groups) do
 	for _, thing in pairs(data.raw[group]) do
@@ -101,6 +98,7 @@ for _, group in ipairs(item_check_groups) do
 	end
 end
 
+-- Considering modules, for the startup setting.
 if (MAKE_MODULES_FREE)
 then
 	for _, module in pairs(data.raw["module"]) do
@@ -109,10 +107,17 @@ then
 	end
 end
 
--- Figure out which recipes take buildings as ingredients, and decompose those into their
--- ... component parts (so that things like green/purple science are not made free)
-local item_made_free_ingredients = {}
 
+-- =====================
+-- Script Main Execution
+-- =====================
+
+-- Prep for breakdown feature
+-- >> Bonus: Recycling-style mods can use this as a list of...
+-- ... items to mark as "bad recycle recipes".
+Item_Made_Free_Ingredients = {}
+
+-- Checking all recipes
 local recipes = data.raw["recipe"]
 for _, recipe in pairs(recipes) do
 	local result = Get_Recipe_Result(recipe)
@@ -129,38 +134,62 @@ for _, recipe in pairs(recipes) do
 	then
 		if (result_name)
 		then
-			local ingreds = recipe.ingredients
+			-- Good practice to not overwrite the recipe ingredients, even though...
+			-- ... you are removing them altogether afterwards.
+			local new_ingreds = {}
 
 			-- key step to ensure accuracy of broken-down ingredients
-			for _, ingredient in ipairs(ingreds) do
-				ingredient.amount = ingredient.amount / result_amount
+			for _, ingredient in ipairs(recipe.ingredients) do
+				-- This covers some edge cases, such as gleba crop seeds which get a...
+				-- ... generated recipe from recycling which returns itself.
+				if (ingredient.name ~= result_name)
+				then
+					local new_ingredient = table.deepcopy(ingredient)
+					new_ingredient.amount = new_ingredient.amount / result_amount
+					table.insert(new_ingreds, new_ingredient)
+				end
 			end
 
-			item_made_free_ingredients[result_name] = ingreds
+			if (#new_ingreds > 0)
+			then
+				Item_Made_Free_Ingredients[result_name] = new_ingreds
+			end
 		end
 
 		Make_Recipe_Free(recipe)
 		Mult_Recipe_Output(recipe)
 	end
+end
 
-	-- Prevent free resources from recipes that recycle stuff
+
+-- ======================================
+-- Script Cleanup - Recycling & Breakdown
+-- ======================================
+
+require("compatibility.quality")
+
+-- Prevent free resources from recipes that recycle stuff
+for _, recipe in pairs(recipes) do
 	if (Bad_Recycle_Recipes[recipe.name])
 	then
 		recipe.results = {}
 	end
 end
 
-
 -- Now check for recipes that *use* buildings (which have been made free)
 -- .. and decompose those buildings into the ingredients that they would've
 -- .. normally needed! Doing this maintains the actual cost of things like research
 -- .. but allows for free buildings nonetheless
 
+-- To maintain actual costs for things like research, we break down...
+-- ... things which were made "free"
+-- To avoid errors, we need a secondary loop for this.
+
 -- Needs to happen in a secondary loop, since the first
 -- ... figures out what free things are made of
-if (INGREDIENT_BREAKDOWN and false)
+if (INGREDIENT_BREAKDOWN)
 then
 	for _, recipe in pairs(recipes) do
-		Breakdown_Recipe_Ingredients(recipe, item_made_free_ingredients)
+		Breakdown_Recipe_Ingredients(recipe, Item_Made_Free_Ingredients)
 	end
 end

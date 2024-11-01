@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Date: 2024-11-01
+  Features:
+    - Returned functionality of breakdown feature
+    - Fixed heavy-handed approach to Quality mod's recycling
+---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: 2024-10-28
   Features:

@@ -4,26 +4,19 @@ function Add_Or_Increment_Table_Value(table, key, value)
 end
 
 function Get_Recipe_Result(recipe)
-	if (not recipe.results or not #recipe.results == 1) then return nil end
-	return recipe.results[1]
+	if (recipe.results and #recipe.results == 1)
+	then
+		return recipe.results[1]
+	end
+	return nil
 end
 
 function Make_Recipe_Free(recipe)
-	local variants = {
-		recipe,
-		recipe.normal,
-		recipe.expensive
-	}
+	recipe.ingredients = {}
+	recipe.energy_required = RECIPE_TIME
 
-	for _, variant in ipairs(variants) do
-		if (variant)
-		then
-			variant.ingredients = {}
-			variant.energy_required = RECIPE_TIME
-		end
-	end
-
-	-- This "crafting" category should allow most everything to make it, including the player.
+	-- The "crafting" category allows the player to craft the item.
+	-- >> As a side effect, all assemblers should also be able to craft the item.
 	if (recipe.category)
 	then
 		recipe.category = "crafting"
@@ -112,7 +105,13 @@ function Breakdown_Recipe_Ingredients(recipe, breakdown_table)
 
 	if (iterations_done >= max_iterations)
 	then
-		log("FreeBuildings workable error - Max iterations reached breaking down recipe: " + recipe.name)
+		local error_msg = "FreeBuildings error - Caught in loop breaking down recipe: " .. recipe.name
+		log(error_msg)
+		log(item_name)
+		for _, ingredient in pairs(working_ingredients) do
+			log("Type: " .. ingredient.type .. ", Name: " .. ingredient.name .. ", Amount: " .. ingredient.amount)
+		end
+		log("Trigger Error Now" + 0)
 	end
 
 	if (any_breakdown_done)
