@@ -111,20 +111,13 @@ function Breakdown_Recipe_Ingredients(recipe, breakdown_table)
 		for _, ingredient in pairs(working_ingredients) do
 			log("Type: " .. ingredient.type .. ", Name: " .. ingredient.name .. ", Amount: " .. ingredient.amount)
 		end
-		log("Trigger Error Now" + 0)
+		log("FreeBuildings: Breakdown Error. Please report this along with your factorio-current.log file." + 0)
 	end
 
 	if (any_breakdown_done)
 	then
 		for _, ingred in ipairs(working_ingredients) do
-			ingred.amount = math.floor(ingred.amount + 0.5)
-
-			-- simpler to safeguard against this here, and helps
-			-- ... to maintain appropriate level of recipe complexity
-			if (ingred.amount == 0)
-			then
-				ingred.amount = 1
-			end
+			ingred.amount = math.max(1, math.floor(ingred.amount + 0.5))
 		end
 
 		recipe.ingredients = working_ingredients

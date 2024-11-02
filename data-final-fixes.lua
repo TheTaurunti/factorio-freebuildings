@@ -62,7 +62,8 @@ require("utils")
 -- ==========
 -- NOTE: Mods which do recycling are handled after main script execution.
 -- >> This field is available NOW so that mods which add 1 or 2 bad recipes can simply add them.
-Bad_Recycle_Recipes = {}
+Recipes_To_Set_No_Output = {}
+Recipes_To_Skip_Breakdown = {}
 
 Mult_Item_Stack_Size(data.raw["rail-planner"]["rail"])
 
@@ -130,30 +131,22 @@ for _, recipe in pairs(recipes) do
 		result_amount = result.amount
 	end
 
-	if (Recipe_ForceList[recipe.name] or (result_name and items_to_be_free[result_name]))
+	if (result_name and (Recipe_ForceList[recipe.name] or items_to_be_free[result_name]))
 	then
-		if (result_name)
-		then
-			-- Good practice to not overwrite the recipe ingredients, even though...
-			-- ... you are removing them altogether afterwards.
-			local new_ingreds = {}
-
-			-- key step to ensure accuracy of broken-down ingredients
-			for _, ingredient in ipairs(recipe.ingredients) do
-				-- This covers some edge cases, such as gleba crop seeds which get a...
-				-- ... generated recipe from recycling which returns itself.
-				if (ingredient.name ~= result_name)
-				then
-					local new_ingredient = table.deepcopy(ingredient)
-					new_ingredient.amount = new_ingredient.amount / result_amount
-					table.insert(new_ingreds, new_ingredient)
-				end
-			end
-
-			if (#new_ingreds > 0)
+		local new_ingreds = {}
+		for _, ingredient in ipairs(recipe.ingredients) do
+			-- Blocks circular breakdown scenarios
+			if (ingredient.name ~= result_name)
 			then
-				Item_Made_Free_Ingredients[result_name] = new_ingreds
+				local new_ingredient = table.deepcopy(ingredient)
+				new_ingredient.amount = new_ingredient.amount / result_amount
+				table.insert(new_ingreds, new_ingredient)
 			end
+		end
+
+		if (#new_ingreds > 0)
+		then
+			Item_Made_Free_Ingredients[result_name] = new_ingreds
 		end
 
 		Make_Recipe_Free(recipe)
@@ -169,27 +162,24 @@ end
 require("compatibility.quality")
 
 -- Prevent free resources from recipes that recycle stuff
+-- > Anything where you had to remove the output
 for _, recipe in pairs(recipes) do
-	if (Bad_Recycle_Recipes[recipe.name])
+	if (Recipes_To_Set_No_Output[recipe.name])
 	then
 		recipe.results = {}
+		Recipes_To_Skip_Breakdown[recipe.name] = true
 	end
 end
 
--- Now check for recipes that *use* buildings (which have been made free)
--- .. and decompose those buildings into the ingredients that they would've
--- .. normally needed! Doing this maintains the actual cost of things like research
--- .. but allows for free buildings nonetheless
-
--- To maintain actual costs for things like research, we break down...
--- ... things which were made "free"
--- To avoid errors, we need a secondary loop for this.
-
--- Needs to happen in a secondary loop, since the first
--- ... figures out what free things are made of
+-- Maintain "real" costs of research and other non-placeable things...
+-- ... by breaking down those free things into component parts in all recipes...
+-- ... that would otherwise include them as an ingredient.
 if (INGREDIENT_BREAKDOWN)
 then
 	for _, recipe in pairs(recipes) do
-		Breakdown_Recipe_Ingredients(recipe, Item_Made_Free_Ingredients)
+		if (not Recipes_To_Skip_Breakdown[recipe.name])
+		then
+			Breakdown_Recipe_Ingredients(recipe, Item_Made_Free_Ingredients)
+		end
 	end
 end
