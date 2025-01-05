@@ -110,9 +110,14 @@ function Breakdown_Recipe_Ingredients(recipe)
   then
     local error_msg = "FreeBuildings error - Caught in loop breaking down recipe: " .. recipe.name
     log(error_msg)
-    log(item_name)
     for _, ingredient in pairs(working_ingredients) do
       log("Type: " .. ingredient.type .. ", Name: " .. ingredient.name .. ", Amount: " .. ingredient.amount)
+      log("Depth-1 Components:")
+      local breakdowns = Item_Made_Free_Ingredients[ingredient.name]
+      for _, broken in ipairs(breakdowns) do
+        log("Type: " .. broken.type .. ", Name: " .. broken.name .. ", Amount: " .. broken.amount)
+      end
+      log("-- end components list")
     end
     log("FreeBuildings: Breakdown Error. Please report this along with your factorio-current.log file." + 0)
   end

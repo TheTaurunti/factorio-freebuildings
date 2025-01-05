@@ -76,7 +76,6 @@ require("compatibility.space-age")
 require("compatibility.space-exploration")
 require("compatibility.wayward-seas")
 
-
 -- ============
 -- Script Setup
 -- ============
@@ -120,39 +119,42 @@ end
 -- ... items to mark as "bad recycle recipes".
 Item_Made_Free_Ingredients = {}
 
--- Checking all recipes
+-- Checking all non-recycling recipes
 local recipes = data.raw["recipe"]
 for _, recipe in pairs(recipes) do
-  local result = Get_Recipe_Result(recipe)
-
-  local result_name = nil
-  local result_amount = nil
-  if (result)
+  if (recipe.category ~= "recycling") -- here to say "these recipes should not be considered paths for recipe breakdown logic"
   then
-    result_name = result.name
-    result_amount = result.amount
-  end
+    local result = Get_Recipe_Result(recipe)
 
-  if (result_name and (Recipe_ForceList[recipe.name] or items_to_be_free[result_name]))
-  then
-    local new_ingreds = {}
-    for _, ingredient in ipairs(recipe.ingredients) do
-      -- Blocks circular breakdown scenarios
-      if (ingredient.name ~= result_name)
-      then
-        local new_ingredient = table.deepcopy(ingredient)
-        new_ingredient.amount = new_ingredient.amount / result_amount
-        table.insert(new_ingreds, new_ingredient)
-      end
-    end
-
-    if (#new_ingreds > 0)
+    local result_name = nil
+    local result_amount = nil
+    if (result)
     then
-      Item_Made_Free_Ingredients[result_name] = new_ingreds
+      result_name = result.name
+      result_amount = result.amount
     end
 
-    Make_Recipe_Free(recipe)
-    Mult_Recipe_Output(recipe)
+    if (result_name and (Recipe_ForceList[recipe.name] or items_to_be_free[result_name]))
+    then
+      local new_ingreds = {}
+      for _, ingredient in ipairs(recipe.ingredients) do
+        -- Blocks circular breakdown scenarios
+        if (ingredient.name ~= result_name)
+        then
+          local new_ingredient = table.deepcopy(ingredient)
+          new_ingredient.amount = new_ingredient.amount / result_amount
+          table.insert(new_ingreds, new_ingredient)
+        end
+      end
+
+      if (#new_ingreds > 0)
+      then
+        Item_Made_Free_Ingredients[result_name] = new_ingreds
+      end
+
+      Make_Recipe_Free(recipe)
+      Mult_Recipe_Output(recipe)
+    end
   end
 end
 
