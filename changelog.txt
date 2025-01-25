@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.6
+Date: 2025-01-24
+  Features:
+    - Set weight of buildings so that rocket capacity is at least 100, or exactly 100 if unset previously
+---------------------------------------------------------------------------------------------------
 Version: 1.1.5
 Date: 2025-01-23
   Features:
