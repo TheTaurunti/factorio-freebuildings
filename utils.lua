@@ -35,7 +35,6 @@ function Mult_Recipe_Output(recipe)
   first_result.amount = first_result.amount * ITEM_OUTPUT_AND_STACK_MULT
 end
 
--- Non-local for mod compats
 function Mult_Item_Stack_Size(item)
   item.weight = (item.weight and math.min(item.weight, 10000)) or 10000
   item.stack_size = item.stack_size * ITEM_OUTPUT_AND_STACK_MULT

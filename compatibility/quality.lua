@@ -11,7 +11,7 @@ if mods["quality"] then
     -- ... which lets the players utilize this mechanic still.
     if (recipes[recycling_name])
     then
-      recipes[recycling_name].results = { { type = "item", name = item_name, amount = 1, probability = 0.25 } }
+      recipes[recycling_name].results = { { type = "item", name = item_name, amount = 1, independent_probability = 0.25 } }
       recipes[recycling_name].energy_required = RECIPE_TIME
       Recipes_To_Skip_Breakdown[recycling_name] = true
     end
