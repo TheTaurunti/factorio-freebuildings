@@ -17,9 +17,9 @@ function Make_Recipe_Free(recipe)
 
   -- The "crafting" category allows the player to craft the item.
   -- >> As a side effect, all assemblers should also be able to craft the item.
-  if (recipe.category)
+  if (recipe.categories)
   then
-    recipe.category = "crafting"
+    recipe.categories = { "crafting" }
   end
 
   -- For similar reasons, removing surface restrictions for crafting buildings is desired.

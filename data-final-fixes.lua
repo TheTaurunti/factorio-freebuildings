@@ -122,7 +122,7 @@ Item_Made_Free_Ingredients = {}
 -- Checking all non-recycling recipes
 local recipes = data.raw["recipe"]
 for _, recipe in pairs(recipes) do
-  if (recipe.category ~= "recycling") -- here to say "these recipes should not be considered paths for recipe breakdown logic"
+  if (not recipe.categories or recipe.categories[1] ~= "recycling") -- here to say "these recipes should not be considered paths for recipe breakdown logic"
   then
     local result = Get_Recipe_Result(recipe)
 
